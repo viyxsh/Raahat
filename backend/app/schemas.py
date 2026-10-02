@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 Category = Literal["medical", "water", "shelter", "other"]
 Urgency = Literal["low", "medium", "high", "critical"]
@@ -19,6 +19,15 @@ class TicketUpdate(BaseModel):
     category: Category | None = None
     urgency: Urgency | None = None
     status: TicketStatus | None = None
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def status_cannot_be_null(cls, v):
+        # status is non-nullable in the DB, so an explicit null must be
+        # rejected here with a 422 instead of failing on commit with a 500
+        if v is None:
+            raise ValueError("status cannot be set to null")
+        return v
 
 
 class TicketOut(BaseModel):

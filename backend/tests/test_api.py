@@ -51,6 +51,20 @@ def test_patch_rejects_unknown_status():
     assert resp.status_code == 422
 
 
+def test_patch_rejects_null_status():
+    created = client.post("/simulate/sms", json=SAMPLE).json()
+    resp = client.patch("/requests/" + str(created["id"]), json={"status": None})
+    assert resp.status_code == 422
+
+
+def test_patch_without_status_keeps_partial_update():
+    created = client.post("/simulate/sms", json=SAMPLE).json()
+    resp = client.patch("/requests/" + str(created["id"]), json={"urgency": "low"})
+    assert resp.status_code == 200
+    assert resp.json()["urgency"] == "low"
+    assert resp.json()["status"] == "new"
+
+
 def test_rejects_out_of_range_location():
     bad = dict(SAMPLE, lat=999)
     assert client.post("/simulate/sms", json=bad).status_code == 422
