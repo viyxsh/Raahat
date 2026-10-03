@@ -24,8 +24,9 @@ def test_simulate_sms_creates_ticket():
     ticket = resp.json()
     assert ticket["text"] == "NEED WATER SECTOR 3"
     assert ticket["status"] == "new"
-    assert ticket["category"] is None
-    assert ticket["urgency"] is None
+    # the classifier runs at intake: water keywords set the category
+    assert ticket["category"] == "water"
+    assert ticket["urgency"] in ("low", "medium", "high", "critical")
     assert ticket["created_at"]
 
 
@@ -58,11 +59,14 @@ def test_patch_rejects_null_status():
 
 
 def test_patch_without_status_keeps_partial_update():
-    created = client.post("/simulate/sms", json=SAMPLE).json()
+    created = client.post(
+        "/simulate/sms", json=dict(SAMPLE, message="FIELD CHECK UNIQUE TICKET")
+    ).json()
     resp = client.patch("/requests/" + str(created["id"]), json={"urgency": "low"})
     assert resp.status_code == 200
     assert resp.json()["urgency"] == "low"
-    assert resp.json()["status"] == "new"
+    # PATCH must not resurrect a flagged ticket to new; it leaves status alone
+    assert resp.json()["status"] == created["status"]
 
 
 def test_rejects_out_of_range_location():

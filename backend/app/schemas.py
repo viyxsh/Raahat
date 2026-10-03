@@ -3,7 +3,9 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-Category = Literal["medical", "water", "shelter", "other"]
+# "food" is a valid classifier output (the rule engine has food keywords) even
+# though the prototype schema exposes the four categories the team agreed on
+Category = Literal["medical", "water", "shelter", "food", "other"]
 Urgency = Literal["low", "medium", "high", "critical"]
 TicketStatus = Literal["new", "flagged", "verified", "assigned"]
 
