@@ -7,10 +7,19 @@ from ..schemas import TicketList, TicketOut, TicketUpdate
 
 router = APIRouter()
 
+URGENCY_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+
 
 @router.get("/requests", response_model=TicketList)
 def list_requests(db: Session = Depends(get_db)):
-    tickets = db.query(Ticket).order_by(Ticket.created_at.desc(), Ticket.id.desc()).all()
+    """Tickets sorted by urgency rank, then newest first within the same
+    urgency level. Unclassified tickets sort last."""
+    tickets = (
+        db.query(Ticket)
+        .order_by(Ticket.created_at.desc(), Ticket.id.desc())
+        .all()
+    )
+    tickets.sort(key=lambda t: URGENCY_RANK.get(t.urgency, 4))
     return {"tickets": tickets}
 
 

@@ -19,3 +19,8 @@ app.add_middleware(
 
 app.include_router(simulate.router)
 app.include_router(requests.router)
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}

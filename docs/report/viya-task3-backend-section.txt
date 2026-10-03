@@ -1,0 +1,123 @@
+CHAPTER 3 : FRONT END, BACKEND AND SYSTEM REQUIREMENT
+
+3.1 Technology Stack and Version Choices
+
+The prototype is built entirely on open-source technologies so that any team member can run the full system locally without paid services or specialised infrastructure. Table 1 lists the components and the version constraints used during development.
+
+Table 1: Technology stack of the prototype
+
+Component - Technology - Version Constraint - Role in RAAHAT
+Backend framework - FastAPI - >= 0.110 - REST API for ticket intake, retrieval and status updates
+ASGI server - Uvicorn (standard extras) - >= 0.29 - Development server hosting the FastAPI application
+Database layer - SQLAlchemy 2.0 ORM - >= 2.0 - Typed ticket model and session management; SQLite now, PostgreSQL-ready via a DATABASE_URL override
+Validation and contracts - Pydantic v2 - >= 2.6 - Request/response schemas shared as the API contract for the frontend and classifier
+Frontend framework - React 18 - ^18.3.1 - Coordinator dashboard and map page
+Mapping - Leaflet.js with react-leaflet - ^1.9.4 / ^4.2.1 - Geospatial map rendering of tickets with urgency-coloured markers
+Frontend tooling - Vite 5 - ^5.4.0 - Dev server and production bundling
+Testing - pytest with FastAPI TestClient - >= 8.0 - Unit tests of the API contract and validation behaviour
+Languages - Python 3.13 / JavaScript (ES modules) - - - Implementation languages
+
+FastAPI was chosen over Flask and Django REST Framework because its Pydantic-based request validation returns precise 422 errors for malformed submissions, which the dashboard and classifier consume as a machine-readable contract rather than ad-hoc error text. SQLAlchemy 2.0 was chosen for the data layer because its typed Mapped column declarations keep the ticket schema in one file, and the same model statements carry over to PostgreSQL in Phase 2 without modification - only the connection string changes.
+
+3.2 Backend Design
+
+3.2.1 Ticket Data Model
+
+Every help request in RAAHAT is a single Ticket record, regardless of the channel it arrives from. Table 2 defines the schema, and Fig. 2 shows the status lifecycle that the duplicate-detection layer and the coordinator workflow drive.
+
+Fig. 2: Ticket status lifecycle (image: fig2_ticket_lifecycle.png)
+
+Table 2: Ticket schema
+
+Field - Type - Constraints - Purpose
+id - integer - Primary key, auto-increment - Unique ticket identifier
+text - string(500) - Required - Original request message as received
+phone - string(20) - Required - Sender contact for volunteer follow-up
+lat - float - -90 to 90 (validated) - Latitude for map plotting
+lng - float - -180 to 180 (validated) - Longitude for map plotting
+category - string(20) - Null until classified; medical / water / shelter / other - Assigned by the AI classifier
+urgency - string(20) - Null until classified; critical / high / medium / low - Assigned by the AI classifier, drives sort order and marker colour
+status - string(20) - Non-nullable; new -> flagged -> verified -> assigned - Lifecycle state moved by duplicate detection and the coordinator
+created_at - datetime - UTC, server-generated - Newest-first ordering of the request list
+
+The category and urgency columns are deliberately nullable: a ticket is committed the moment it arrives, and classification happens as a separate step. This keeps intake fast and means a classifier outage delays labelling without ever losing a request.
+
+3.2.2 API Endpoints
+
+The backend exposes four endpoints, listed in Table 3 and shown rendered in Fig. 3. This interface was fixed before the frontend and classifier modules were built, which is what allowed all five team members to work in parallel.
+
+Fig. 3: Auto-generated API documentation of the backend (image: fig3_api_docs.png)
+
+Table 3: REST API surface
+
+Method - Path - Request Body - Response - Purpose
+POST - /simulate/sms - {message, phone, lat, lng} - 201 + full ticket object - Replicates an SMS gateway webhook: converts a plain-text message into a structured ticket
+GET - /requests - (none) - {tickets: [...]} newest first - Feeds the coordinator dashboard and live map
+GET - /requests/{id} - (none) - 200 + ticket, or 404 - Single-ticket lookup
+PATCH - /requests/{id} - {category?, urgency?, status?} - 200 + updated ticket - Classifier output and coordinator workflow updates
+
+Location validation is enforced at the schema boundary: latitudes outside -90 to 90 and longitudes outside -180 to 180 are rejected with a 422 response before any database write. A PATCH with an explicit null for status is likewise rejected with 422, because the status column is non-nullable - this case surfaced during review, when an explicit null passed validation and would have crashed on commit, and is now covered by a regression test.
+
+3.2.3 Cross-Cutting Design Decisions
+
+CORS middleware is enabled for all origins during prototyping because the React dev server (localhost:5173) and the API (localhost:8000) run on different ports; tightening this to the deployed dashboard origin and adding authentication is planned for Phase 2. Storage uses SQLite for the prototype, but the engine is constructed from a DATABASE_URL environment variable, so switching to PostgreSQL requires configuration only, not code changes. Table creation is automatic on application startup via create_all, which keeps local setup to a single command.
+
+3.3 Front End
+
+The frontend is a React 18 single-page application built with Vite, organised into two screens that share one styling module. The coordinator dashboard (Task 1) presents the priority-sorted request list with status badges and the verify/dismiss workflow for flagged tickets. The live map view (Task 2) renders every ticket as a Leaflet marker at its GPS coordinates, with urgency determining the marker colour and radius: red for critical, orange for high, yellow for medium, green for low, and a neutral grey for tickets not yet classified.
+
+A single shared module (src/utils/urgency.js) is the source of truth for urgency ranks, marker colours and category labels, so the list view and the map view always agree on how a ticket is presented. The frontend fetches tickets from GET /requests through one API module, so the dashboard and map never diverge in their view of the data.
+
+3.4 System Requirements
+
+Development requirements: any machine capable of running Python 3.10+ and Node.js 18+, with no GPU, database server or paid API key required. A full local run needs roughly 200 MB of storage for the two node_modules and virtual environment folders and works entirely offline once dependencies are installed.
+
+Runtime requirements for the prototype: the FastAPI backend and the Vite dev server each consume well under 100 MB of RAM at prototype scale, and SQLite removes any separate database process. The system was exercised on a single laptop with both servers running concurrently alongside the browser client.
+
+Production requirements (Phase 2): a PostgreSQL instance with the PostGIS extension for nearest-volunteer geo-queries, a Redis instance for the priority queue, and a small cloud VM or free-tier container host for the API and the built frontend bundle. These exceed the prototype's free-tier setup and are costed at approximately the price of one small instance.
+
+4.6.2 [Viya] - Task 3: Backend API & Storage
+
+I built the backend of RAAHAT: the FastAPI application, the ticket data model, the storage layer, and the two intake and retrieval endpoint groups that every other module builds on.
+
+The first thing I did was define the API contract before writing the implementation. I published the request and response shapes for POST /simulate/sms and GET /requests to the team, along with the ticket schema (id, text, phone, lat, lng, category, urgency, status, created_at), so the dashboard, map and classifier members could build against a fixed interface instead of waiting for my endpoints to exist. This is the reason the four modules integrated with almost no contract disputes.
+
+The ticket model uses SQLAlchemy 2.0 typed mappings with category and urgency deliberately nullable: a ticket commits the moment it arrives, and the classifier fills those two columns later through PATCH. Status follows the new -> flagged -> verified -> assigned lifecycle, and a non-nullable constraint on it caught a real bug during review - an explicit null status passed validation and would have crashed on commit, so it is now rejected with a 422 and covered by a regression test.
+
+For storage I chose SQLite for the prototype but constructed the engine from a DATABASE_URL environment variable, which means the Phase 2 PostgreSQL migration is a configuration change rather than a rewrite. Location bounds, message length and phone format are validated at the schema boundary, so malformed requests are rejected with precise 422 errors before any database write.
+
+I verified the work with 8 pytest cases covering ticket creation, list shape, status updates, validation rejections and 404s, then exercised every endpoint against a running server: a simulated SMS returned 201 with the full ticket, PATCH moved a ticket to verified with category and urgency set, and an unknown id returned the correct 404. Two rounds of independent code review were run on the diff; the first found the null-status defect above and the second confirmed the fix with no security or logic findings. The backend merged to main after review, and the dashboard and map view consume it as their data source.
+
+CHAPTER 4 : METHODOLOGY (backend working principle - Viya's section)
+
+4.x Backend Working Principle
+
+The backend follows one principle: every help request, from any channel, becomes the same structured ticket before anything else happens to it. Fig. 1 shows how the pieces connect.
+
+Fig. 1: RAAHAT backend and module architecture (image: fig1_architecture.png)
+
+Working principle, step by step:
+
+1. Intake. A request arrives at POST /simulate/sms with a message, phone number and GPS coordinates. In production the same endpoint shape is what an SMS gateway webhook (Twilio/MSG91) will call; the simulate endpoint stands in for it during the prototype so the demo never depends on network or gateway availability.
+
+2. Validation. Pydantic v2 checks the payload at the boundary: message length (1 to 500 characters), phone format, and location bounds (latitude -90 to 90, longitude -180 to 180). Invalid submissions are rejected with a 422 response before any code touches the database, and the error response names the exact field that failed, which is what the frontend reads to show the user what to fix.
+
+3. Storage. The validated payload becomes a Ticket row committed immediately, with status new and category and urgency still null. Intake is therefore never blocked by the classifier: a slow or failed classification delays labelling, never the capture of the request itself.
+
+4. Serving. GET /requests returns all tickets newest-first as JSON, which is the single data source for both human-facing views: the coordinator dashboard's priority list and the Leaflet map's markers. PATCH /requests/{id} moves a ticket along its lifecycle - the classifier sets category and urgency, the coordinator moves status through flagged and verified to assigned - so both views always reflect the same underlying records.
+
+5. Concurrency model. Each request runs against a short-lived database session provided per-call and closed in a finally block, so no session leaks across requests. Uvicorn serves the app as a single ASGI process during the prototype; the same app object runs under multiple workers without code changes when load demands it.
+
+CHAPTER 5: CONCLUSION (backend screenshots - Viya's section)
+
+Screenshots of the backend as demonstrated:
+
+Fig. 3 (above): the auto-generated API documentation at /docs, showing all four endpoints and the request/response schemas of the running backend.
+
+Fig. 4: GET /requests returning the live ticket list - three seeded requests, one already classified (category water, urgency high) and verified through the coordinator workflow, two awaiting classification. This is the response the dashboard list and the map consume.
+
+Fig. 4: Live GET /requests response from the running backend (image: fig4_requests_response.png)
+
+The screenshots were taken from the backend running locally on port 8000 with seeded demo requests at Bhopal coordinates. Together they demonstrate the backend end to end: documented endpoints, validated intake, and a live queryable ticket store that the coordinator dashboard and map view render in real time.
+
+Note for the report editor: renumber these figures in final assembly if Diya's 4.5 section or other members' sections add figures of their own - the numbering must stay sequential across the whole report, and the List of Figures page must match.
