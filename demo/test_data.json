@@ -1,0 +1,202 @@
+[
+  {
+    "message": "PERSON UNCONSCIOUS ROAD ACCIDENT SECTOR 7",
+    "phone": "+919001000001",
+    "lat": 23.2250,
+    "lng": 77.4200,
+    "expected_category": "medical",
+    "expected_urgency": "critical",
+    "expected_status": "new",
+    "scene": "Scene 3 — critical medical"
+  },
+  {
+    "message": "POWER OUTAGE OXYGEN MACHINE NOT WORKING ICU WARD",
+    "phone": "+919001000002",
+    "lat": 23.2210,
+    "lng": 77.4090,
+    "expected_category": "medical",
+    "expected_urgency": "critical",
+    "expected_status": "new",
+    "scene": "Scene 3 — critical medical"
+  },
+  {
+    "message": "FAMILY TRAPPED UNDER COLLAPSED ROOF SECTOR 4",
+    "phone": "+919001000003",
+    "lat": 23.2300,
+    "lng": 77.4150,
+    "expected_category": "shelter",
+    "expected_urgency": "critical",
+    "expected_status": "new",
+    "scene": "Scene 3 — critical shelter"
+  },
+  {
+    "message": "NEED BLOOD O POSITIVE URGENT DISTRICT HOSPITAL",
+    "phone": "+919001000004",
+    "lat": 23.2180,
+    "lng": 77.4050,
+    "expected_category": "medical",
+    "expected_urgency": "critical",
+    "expected_status": "new",
+    "scene": "Scene 3 — critical medical"
+  },
+  {
+    "message": "ELDERLY PERSON NEEDS AMBULANCE NOW SECTOR 2",
+    "phone": "+919001000005",
+    "lat": 23.2200,
+    "lng": 77.4180,
+    "expected_category": "medical",
+    "expected_urgency": "critical",
+    "expected_status": "new",
+    "scene": "Scene 3 — critical medical"
+  },
+  {
+    "message": "FLOOD WATER ENTERING HOUSES SECTOR 12",
+    "phone": "+919001000006",
+    "lat": 23.2400,
+    "lng": 77.4350,
+    "expected_category": "water",
+    "expected_urgency": "high",
+    "expected_status": "new",
+    "scene": "Scene 3 — high water"
+  },
+  {
+    "message": "DRINKING WATER NOT AVAILABLE FOR 3 DAYS IN RELIEF CAMP",
+    "phone": "+919001000007",
+    "lat": 23.2100,
+    "lng": 77.3900,
+    "expected_category": "water",
+    "expected_urgency": "high",
+    "expected_status": "new",
+    "scene": "Scene 3 — high water"
+  },
+  {
+    "message": "NO FOOD FOR 2 DAYS 200 PEOPLE INCLUDING CHILDREN SECTOR 5",
+    "phone": "+919001000008",
+    "lat": 23.2150,
+    "lng": 77.4100,
+    "expected_category": "food",
+    "expected_urgency": "high",
+    "expected_status": "new",
+    "scene": "Scene 3 — high food"
+  },
+  {
+    "message": "BABY NEEDS MILK AND BABY FOOD URGENT SECTOR 9",
+    "phone": "+919001000009",
+    "lat": 23.2260,
+    "lng": 77.4120,
+    "expected_category": "food",
+    "expected_urgency": "high",
+    "expected_status": "new",
+    "scene": "Scene 3 — high food"
+  },
+  {
+    "message": "NEED SHELTER 20 PEOPLE INCLUDING ELDERLY AFTER HOUSE COLLAPSE",
+    "phone": "+919001000010",
+    "lat": 23.2350,
+    "lng": 77.4250,
+    "expected_category": "shelter",
+    "expected_urgency": "high",
+    "expected_status": "new",
+    "scene": "Scene 3 — high shelter"
+  },
+  {
+    "message": "MEDICINE REQUIRED DIABETIC PATIENT URGENT SECTOR 6",
+    "phone": "+919001000011",
+    "lat": 23.2280,
+    "lng": 77.4000,
+    "expected_category": "medical",
+    "expected_urgency": "high",
+    "expected_status": "new",
+    "scene": "Scene 3 — high medical"
+  },
+  {
+    "message": "PIPELINE BURST WATER LOGGING AREA SECTOR 8",
+    "phone": "+919001000012",
+    "lat": 23.2420,
+    "lng": 77.4300,
+    "expected_category": "water",
+    "expected_urgency": "medium",
+    "expected_status": "new",
+    "scene": "Scene 3 — medium water"
+  },
+  {
+    "message": "NEED BLANKETS AND WARM CLOTHES FOR FLOOD VICTIMS",
+    "phone": "+919001000013",
+    "lat": 23.2380,
+    "lng": 77.4220,
+    "expected_category": "shelter",
+    "expected_urgency": "medium",
+    "expected_status": "new",
+    "scene": "Scene 3 — medium shelter"
+  },
+  {
+    "message": "NEED DOCTOR FOR HIGH FEVER PATIENT SECTOR 3",
+    "phone": "+919001000014",
+    "lat": 23.2170,
+    "lng": 77.4030,
+    "expected_category": "medical",
+    "expected_urgency": "medium",
+    "expected_status": "new",
+    "scene": "Scene 3 — medium medical"
+  },
+  {
+    "message": "ROAD BLOCKED CANNOT REACH HOSPITAL SECTOR 11",
+    "phone": "+919001000015",
+    "lat": 23.2450,
+    "lng": 77.4380,
+    "expected_category": "other",
+    "expected_urgency": "medium",
+    "expected_status": "new",
+    "scene": "Scene 3 — medium other"
+  },
+  {
+    "message": "TREE FALLEN ON HOUSE ROOF DAMAGED SECTOR 3",
+    "phone": "+919001000016",
+    "lat": 23.2290,
+    "lng": 77.4060,
+    "expected_category": "shelter",
+    "expected_urgency": "medium",
+    "expected_status": "new",
+    "scene": "Scene 3 — medium shelter"
+  },
+  {
+    "message": "NEED WATER SECTOR 3",
+    "phone": "+919001000017",
+    "lat": 23.2100,
+    "lng": 77.3950,
+    "expected_category": "water",
+    "expected_urgency": "medium",
+    "expected_status": "new",
+    "scene": "Scene 5 — original (before duplicate)"
+  },
+  {
+    "message": "NEED WATER SECTOR 3 URGENT PLEASE HELP",
+    "phone": "+919001000018",
+    "lat": 23.2105,
+    "lng": 77.3955,
+    "expected_category": "water",
+    "expected_urgency": "high",
+    "expected_status": "flagged",
+    "scene": "Scene 5 — DUPLICATE of ticket 17, should be flagged"
+  },
+  {
+    "message": "RATION DISTRIBUTION REQUIRED LOW INCOME AREA SECTOR 10",
+    "phone": "+919001000019",
+    "lat": 23.2320,
+    "lng": 77.4080,
+    "expected_category": "food",
+    "expected_urgency": "low",
+    "expected_status": "new",
+    "scene": "Scene 3 — low food"
+  },
+  {
+    "message": "TEST MESSAGE PLEASE IGNORE THIS IS NOT AN EMERGENCY",
+    "phone": "+919001000020",
+    "lat": 23.2500,
+    "lng": 77.4450,
+    "expected_category": "other",
+    "expected_urgency": "low",
+    "expected_status": "new",
+    "scene": "Scene 6 — spam/dismiss demo"
+  }
+]
